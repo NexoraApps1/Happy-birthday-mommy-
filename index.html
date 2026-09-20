@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2a0f3d">
+<title>С днём рождения, мамочка!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marck+Script&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+<!-- ================================================================
+     НАСТРОЙКИ — меняй только этот блок, остальное трогать не нужно
+     ================================================================ -->
+<script>
+const CONFIG = {
+  // ---------- Первый экран ----------
+  title: "С днём рождения,\nмамa!",      // \n = перенос строки
+  hint: "Для тебя здесь небольшой сюрприз",
+
+  // Возраст на торте (число) или null, чтобы не показывать
+  age: null,
+
+  // Открытка появится только в нужный момент. Пример: "2026-10-05T08:00"
+  // (время — по часам того, кто открывает). null = открывается сразу.
+  // Чтобы самому посмотреть раньше срока, добавь к ссылке ?preview
+  unlockAt: null,
+
+  // ---------- Письмо ----------
+  heading: "Мама, поздравляю тебя с твоим днем!",
+  lines: [
+    "Пусть каждый твой день будет наполнен счастьем и теплотой.",
+    "Желаю тебе здоровья, а остольное все будет.",
+    "Спасибо тебе за все.",
+    "Я очень тебя люблю."
+  ],
+  signature: "С любовью, Асан",
+
+  // ---------- Шарики: по одному пожеланию в каждом ----------
+  wishes: [
+    "Самого крепкого здоровья, чтобы каждое утро начиналось с улыбкой.",
+    "Спокойных дней и тихих вечеров с родными.",
+    "Чтобы рядом всегда были те, кто тебя любит.",
+    "Үстінде вилла астында лимузин болсын =).",
+    "Пускай ты каждый день будешь радоваться хорошим новостям.",
+    "Пусть все твои мечты сбываются.",
+    "Вся доброта что ты для нас делаешь. Пусть оно вернётся к тебе вдвое.",
+    "И просто знай: ты у меня самая лучшая мама на свете."
+  ],
+
+  // ---------- Финал ----------
+  finalTitle: "С днём рождения!",
+  finalText: "Ты — самое дорогое, что у меня есть. Обнимаю крепко!",
+  reelTitle: "Наши воспоминания",
+
+  // ---------- Фото ----------
+  // Положи снимки в папку photos рядом с этим файлом и перечисли их.
+  // Можно просто именем, а можно с подписью:
+  // photos: ["photos/1.jpg", { src: "photos/2.jpg", caption: "Лето 2015" }]
+  // Пока список пустой, плавают картинки-заглушки.
+  photos: ["мамафото.jpeg","мамафото (1).jpeg","мамафото (2).jpeg","мамафото (3).jpeg","мамафото (4).jpeg","мамафото (5).jpeg","мамафото (6).jpeg","мамафото (7).jpeg","мамафото (8).jpeg","мамафото (9).jpeg","мамафото (10).jpeg","мамафото (11).jpeg","мамафото (12).jpeg"],
+
+  // Кнопка «Добавить свои фото» для предпросмотра. Перед отправкой поставь false.
+  showUploadButton: false,
+
+  // ---------- Звук ----------
+  sound: true,        // false = полностью без звука
+  musicFile: ""       // например "music.mp3"; пусто = играет встроенная мелодия
+};
+</script>
+
+<style>
+:root{
+  --night:#2a0f3d; --dusk:#4a1856; --plum:#7b2963;
+  --berry:#e23f7f; --apricot:#ffb58a; --lilac:#cdb8ff; --paper:#fff6ee;
+  --script:'Marck Script','Segoe Script','Brush Script MT',cursive;
+  --sans:'Nunito',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mx:0px; --my:0px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--night)}
+body{
+  margin:0;min-height:100dvh;color:var(--paper);font-family:var(--sans);
+  overflow-x:hidden;-webkit-font-smoothing:antialiased;
+}
+button{font:inherit}
+:focus-visible{outline:3px solid var(--apricot);outline-offset:3px}
+
+/* ---------- Небо и звёзды ---------- */
+.sky{
+  position:fixed;inset:0;z-index:0;overflow:hidden;
+  background:
+    radial-gradient(120% 70% at 50% 115%, rgba(255,138,107,.45) 0%, transparent 60%),
+    radial-gradient(70% 50% at 12% 0%, rgba(138,63,191,.45) 0%, transparent 65%),
+    linear-gradient(180deg, var(--night) 0%, var(--dusk) 55%, var(--plum) 100%);
+}
+.star{position:absolute;border-radius:50%;background:#fff;opacity:.2;animation:twinkle var(--t) ease-in-out var(--d) infinite}
+@keyframes twinkle{0%,100%{opacity:.12;transform:scale(.8)}50%{opacity:.95;transform:scale(1.2)}}
+.shoot{
+  position:absolute;width:110px;height:2px;opacity:0;border-radius:2px;
+  background:linear-gradient(90deg,rgba(255,255,255,0),#fff);transform:rotate(-32deg);
+}
+.shoot.go{animation:shoot 1.1s ease-out}
+@keyframes shoot{
+  0%{opacity:0;transform:translate(0,0) rotate(-32deg)}
+  15%{opacity:1}
+  100%{opacity:0;transform:translate(-260px,164px) rotate(-32deg)}
+}
+
+/* ---------- Плавающие фото ---------- */
+.floaters{position:fixed;inset:0;z-index:1;overflow:hidden;pointer-events:none}
+.float{
+  position:absolute;top:0;
+  left:min(var(--x), calc(100% - var(--w)));
+  width:var(--w);opacity:var(--op);filter:blur(var(--blur));
+  animation:rise var(--dur) linear var(--delay) infinite;will-change:transform;
+}
+.par{
+  transform:translate(calc(var(--mx) * var(--d)), calc(var(--my) * var(--d)));
+  transition:transform .7s ease-out;
+}
+.sway{transform-origin:50% 0;animation:sway var(--sway) ease-in-out infinite alternate}
+.frame{
+  position:relative;background:#fff;
+  padding:6px 6px calc(var(--w) / 8 + 6px);border-radius:4px;
+  box-shadow:0 12px 32px rgba(10,0,20,.4);pointer-events:auto;cursor:zoom-in;
+}
+.frame.far{pointer-events:none;cursor:default}
+.frame img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;background:#eee;user-select:none}
+.cap{
+  position:absolute;left:6px;right:6px;bottom:calc(var(--w) / 40 + 2px);
+  font-family:var(--script);font-size:calc(var(--w) / 12);line-height:1.2;color:var(--dusk);
+  text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+@keyframes rise{from{transform:translate3d(0,100vh,0)}to{transform:translate3d(0,-115%,0)}}
+@keyframes sway{
+  from{transform:translateX(-16px) rotate(calc(var(--rot) - 4deg))}
+  to{transform:translateX(16px) rotate(calc(var(--rot) + 4deg))}
+}
+
+/* ---------- Сцены ---------- */
+main{
+  position:relative;z-index:2;min-height:100dvh;
+  display:grid;place-items:center;padding:34px 18px 90px;pointer-events:none;
+}
+.scene{
+  width:min(680px,100%);text-align:center;pointer-events:auto;
+  animation:sceneIn .8s cubic-bezier(.2,.8,.2,1) both;
+}
+.scene.out{animation:sceneOut .4s ease both;pointer-events:none}
+@keyframes sceneIn{from{opacity:0;transform:translateY(22px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes sceneOut{to{opacity:0;transform:scale(.96)}}
+#s-finale{width:min(960px,100%)}
+
+.shadowed{text-shadow:0 2px 6px rgba(42,15,61,.75),0 6px 40px rgba(42,15,61,.9)}
+.title{
+  font-family:var(--script);font-weight:400;
+  font-size:clamp(3rem,11vw,7rem);line-height:1.02;margin:0 0 14px;
+  text-shadow:0 2px 6px rgba(42,15,61,.7),0 6px 40px rgba(42,15,61,.9);
+}
+.w{
+  display:inline-block;white-space:nowrap;opacity:0;
+  animation:word 1s cubic-bezier(.2,.9,.2,1) forwards;
+  animation-delay:calc(var(--i) * 260ms + 250ms);
+}
+@keyframes word{
+  from{opacity:0;transform:translateY(.45em);filter:blur(10px)}
+  to{opacity:1;transform:none;filter:blur(0)}
+}
+.hint,.sub{
+  margin:0 0 28px;font-size:1.15rem;font-weight:600;
+  text-shadow:0 1px 4px rgba(42,15,61,.9),0 2px 24px rgba(42,15,61,.9);
+}
+.head{
+  font-family:var(--script);font-weight:400;margin:0 0 8px;
+  font-size:clamp(2.4rem,8vw,4.2rem);line-height:1.08;
+  text-shadow:0 2px 6px rgba(42,15,61,.75),0 6px 40px rgba(42,15,61,.9);
+}
+
+.open{
+  font-weight:700;font-size:1.1rem;color:#fff;cursor:pointer;
+  background:var(--berry);border:0;border-radius:999px;padding:16px 34px;
+  animation:pulse 2.4s ease-in-out infinite;transition:transform .15s ease,opacity .3s ease;
+}
+.open.small{font-size:1rem;padding:13px 26px}
+.open:hover:not(:disabled){transform:scale(1.05)}
+.open:active:not(:disabled){transform:scale(.97)}
+.open:disabled{opacity:.5;animation:none;cursor:not-allowed}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(226,63,127,.55)}50%{box-shadow:0 0 0 16px rgba(226,63,127,0)}}
+.ghost{
+  font-weight:600;color:var(--paper);cursor:pointer;background:rgba(35,12,50,.35);
+  border:1px solid rgba(255,246,238,.4);border-radius:999px;padding:11px 22px;transition:background .15s ease;
+}
+.ghost:hover{background:rgba(255,246,238,.14)}
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+.fade-in{animation:sceneIn .7s ease both}
+
+/* ---------- Обратный отсчёт ---------- */
+.countdown{display:flex;gap:10px;justify-content:center;margin:0 0 26px}
+.countdown div{
+  min-width:66px;padding:10px 8px;border-radius:16px;
+  background:rgba(35,12,50,.6);border:1px solid rgba(255,246,238,.2);
+}
+.countdown b{display:block;font-size:1.7rem;font-variant-numeric:tabular-nums;line-height:1.1}
+.countdown span{font-size:.8rem;opacity:.85}
+
+/* ---------- Торт ---------- */
+.cakewrap{position:relative;width:min(360px,84vw);margin:6px auto 0}
+.cakewrap::before{
+  content:"";position:absolute;left:50%;top:18%;width:130%;aspect-ratio:1;transform:translate(-50%,-35%);
+  background:radial-gradient(circle,rgba(255,196,110,.5) 0%,rgba(255,196,110,0) 62%);
+  transition:opacity 1s ease;pointer-events:none;
+}
+.cakewrap.out::before{opacity:0}
+.cake{display:block;width:100%;padding:0;border:0;background:none;cursor:pointer;position:relative}
+.cake:disabled{cursor:default}
+.cake svg{display:block;width:100%;height:auto;overflow:visible}
+.flame{
+  transform-box:fill-box;transform-origin:50% 100%;
+  animation:flicker .2s ease-in-out infinite alternate;
+  transition:opacity .35s ease;
+}
+@keyframes flicker{from{transform:scale(1,1) rotate(-2deg)}to{transform:scale(.92,1.09) rotate(2deg)}}
+.cakewrap.out .flame{animation:none;opacity:0;transform:scale(.2)}
+.smoke{opacity:0}
+.cakewrap.out .smoke{animation:smoke 2.4s ease-out forwards}
+@keyframes smoke{
+  0%{opacity:0;transform:translateY(0)}
+  20%{opacity:.85}
+  100%{opacity:0;transform:translateY(-24px)}
+}
+.micnote{min-height:1.5em;margin:12px 0 0;font-size:.95rem;text-shadow:0 1px 8px rgba(42,15,61,.9)}
+
+/* ---------- Письмо ---------- */
+.card{
+  width:100%;padding:clamp(24px,5vw,46px);text-align:left;
+  background:rgba(35,12,50,.62);
+  -webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);
+  border:1px solid rgba(255,246,238,.18);border-radius:28px;
+}
+.card h2{
+  font-family:var(--script);font-weight:400;color:var(--apricot);
+  font-size:clamp(2.2rem,7vw,3.4rem);line-height:1.1;margin:0 0 20px;
+}
+.card p{margin:0 0 16px;font-size:1.1rem;line-height:1.65;max-width:56ch}
+.c{opacity:0;transition:opacity .35s ease}
+.c.on{opacity:1}
+.sign{
+  font-family:var(--script);font-size:1.9rem!important;color:var(--lilac);
+  text-align:right;margin:24px 0 0!important;max-width:none!important;
+}
+.reveal{opacity:0;transform:translateY(10px);transition:opacity .9s ease,transform .9s ease}
+.reveal.in{opacity:1;transform:none}
+.card .row{justify-content:flex-start}
+
+/* ---------- Шарики ---------- */
+.balloons{position:relative;margin:4px 0 6px}
+.balloon{
+  position:absolute;left:var(--bx);top:var(--by);width:var(--bw);height:calc(var(--bw) * 1.22);
+  padding:0;border:0;background:none;cursor:pointer;
+  animation:bob var(--bt) ease-in-out var(--bd) infinite alternate;
+}
+.balloon .b{
+  position:absolute;inset:0;
+  border-radius:50% 50% 48% 48% / 55% 55% 45% 45%;
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255,255,255,.7) 0 7%, transparent 8%),
+    radial-gradient(circle at 50% 40%, var(--c1), var(--c2));
+  box-shadow:inset -8px -10px 18px rgba(0,0,0,.18),0 10px 24px rgba(10,0,20,.3);
+}
+.balloon::after{
+  content:"";position:absolute;left:50%;top:100%;width:1.5px;height:54px;
+  background:rgba(255,246,238,.5);transform:translateX(-50%);
+}
+.balloon:hover:not(:disabled) .b{filter:brightness(1.12)}
+.balloon.pop .b{animation:popb .2s ease-out forwards}
+.balloon.pop::after{opacity:0}
+.balloon:disabled{cursor:default;pointer-events:none}
+@keyframes bob{
+  from{transform:translateY(-8px) rotate(-2.5deg)}
+  to{transform:translateY(10px) rotate(2.5deg)}
+}
+@keyframes popb{to{transform:scale(1.6);opacity:0}}
+.wishbox{min-height:5.6em;display:grid;place-items:center;text-align:center;margin-top:12px}
+.wishbox p{margin:0;font-size:1.15rem;line-height:1.55;max-width:44ch}
+.wishbox .swap{animation:sceneIn .5s ease both}
+.count{margin:12px 0 0;font-size:.95rem;text-shadow:0 1px 8px rgba(42,15,61,.9)}
+
+/* ---------- Финал ---------- */
+.big{
+  font-family:var(--script);font-weight:400;margin:0 0 10px;
+  font-size:clamp(3rem,12vw,6.5rem);line-height:1.05;
+  text-shadow:0 2px 6px rgba(42,15,61,.75),0 6px 40px rgba(42,15,61,.9);
+}
+.reelhead{
+  font-family:var(--script);font-size:1.9rem;margin:30px 0 0;
+  text-shadow:0 2px 12px rgba(42,15,61,.9);
+}
+.reel{
+  display:flex;gap:18px;overflow-x:auto;padding:22px 18px 26px;margin:0 -18px;
+  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+}
+.reel figure{
+  margin:0;flex:0 0 min(240px,68vw);scroll-snap-align:center;
+  background:#fff;padding:8px 8px 12px;border-radius:4px;color:var(--dusk);
+  box-shadow:0 12px 32px rgba(10,0,20,.4);transform:rotate(var(--rot));cursor:zoom-in;
+}
+.reel figure:first-child{margin-left:auto}
+.reel figure:last-child{margin-right:auto}
+.reel img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;background:#eee}
+.reel figcaption{font-family:var(--script);font-size:1.25rem;text-align:center;padding-top:8px;min-height:1.7em}
+.finalsign{font-family:var(--script);font-size:2rem;margin:8px 0 0;color:var(--lilac);text-shadow:0 2px 12px rgba(42,15,61,.9)}
+
+/* ---------- Кнопки по углам ---------- */
+.ctrl{
+  position:fixed;z-index:5;font-size:.95rem;color:var(--paper);cursor:pointer;
+  background:rgba(35,12,50,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,246,238,.22);border-radius:999px;padding:10px 16px;
+}
+.mute{top:calc(14px + env(safe-area-inset-top,0px));right:14px}
+.upload{bottom:calc(14px + env(safe-area-inset-bottom,0px));left:14px}
+.upload:focus-within{outline:3px solid var(--apricot);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- Просмотр фото ---------- */
+.lightbox{
+  position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:20px;
+  background:rgba(20,5,30,.88);cursor:zoom-out;animation:fade .25s ease both;
+}
+.lightbox figure{margin:0;background:#fff;padding:10px 10px 14px;border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,.6);color:var(--dusk)}
+.lightbox img{display:block;max-width:min(88vw,860px);max-height:76dvh}
+.lightbox figcaption{font-family:var(--script);font-size:1.6rem;text-align:center;padding-top:8px}
+.lightbox figcaption:empty{display:none}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+
+#fireworks,#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#fireworks{z-index:6}
+#confetti{z-index:8}
+
+@media (prefers-reduced-motion:reduce){
+  .float{animation:none;transform:translate3d(0,var(--sy),0)}
+  .sway,.balloon,.flame,.star{animation:none}
+  .sway{transform:rotate(var(--rot))}
+  .w{animation:none;opacity:1}
+  .open{animation:none}
+  .scene,.scene.out,.fade-in{animation:none}
+  .reveal,.c,.par{transition:none}
+}
+</style>
+</head>
+<body>
+
+<div class="sky" id="sky" aria-hidden="true"><div class="shoot" id="shoot"></div></div>
+<div class="floaters" id="floaters" aria-hidden="true"></div>
+<canvas id="fireworks" aria-hidden="true"></canvas>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<main>
+  <!-- 1. Приветствие -->
+  <section class="scene" id="s-intro">
+    <h1 class="title" id="title"></h1>
+    <p class="hint" id="hint"></p>
+    <div class="countdown" id="countdown" hidden>
+      <div><b id="cd-d">0</b><span>дн</span></div>
+      <div><b id="cd-h">0</b><span>ч</span></div>
+      <div><b id="cd-m">0</b><span>мин</span></div>
+      <div><b id="cd-s">0</b><span>сек</span></div>
+    </div>
+    <button class="open" id="openBtn" type="button">Открыть поздравление</button>
+  </section>
+
+  <!-- 2. Торт -->
+  <section class="scene" id="s-cake" hidden>
+    <h2 class="head" id="cakeHead">Загадай желание</h2>
+    <p class="sub" id="cakeSub">Нажми на торт, чтобы задуть свечи</p>
+    <div class="cakewrap" id="cakeWrap">
+      <button class="cake" id="cake" type="button" aria-label="Задуть свечи"></button>
+    </div>
+    <p class="micnote" id="micNote" aria-live="polite"></p>
+    <div class="row">
+      <button class="ghost" id="micBtn" type="button">🎤 Подуть в микрофон</button>
+      <button class="open small fade-in" id="toLetter" type="button" hidden>Читать поздравление</button>
+    </div>
+  </section>
+
+  <!-- 3. Письмо -->
+  <section class="scene" id="s-letter" hidden>
+    <div class="card">
+      <h2 id="heading"></h2>
+      <div id="lines"></div>
+      <p class="sign reveal" id="sign"></p>
+      <div class="row">
+        <button class="ghost" id="skipType" type="button">Показать сразу</button>
+        <button class="open small fade-in" id="toWishes" type="button" hidden>Дальше: шарики с пожеланиями</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Шарики -->
+  <section class="scene" id="s-wishes" hidden>
+    <h2 class="head">Пожелания в шариках</h2>
+    <p class="sub">Лопни шарик — внутри пожелание для тебя</p>
+    <div class="balloons" id="balloons"></div>
+    <div class="card wishbox" id="wishbox" aria-live="polite"><p id="wishText"></p></div>
+    <p class="count" id="wishCount"></p>
+    <div class="row">
+      <button class="ghost" id="skipWishes" type="button">Пропустить</button>
+      <button class="open small fade-in" id="toFinale" type="button" hidden>Дальше</button>
+    </div>
+  </section>
+
+  <!-- 5. Финал -->
+  <section class="scene" id="s-finale" hidden>
+    <h2 class="big" id="finalTitle"></h2>
+    <p class="sub" id="finalText"></p>
+    <p class="reelhead" id="reelHead"></p>
+    <div class="reel" id="reel" tabindex="0" aria-label="Фотографии, листай вбок"></div>
+    <p class="finalsign" id="finalSign"></p>
+    <div class="row">
+      <button class="open small" id="moreFw" type="button">Ещё салют</button>
+      <button class="ghost" id="restart" type="button">Смотреть сначала</button>
+    </div>
+  </section>
+</main>
+
+<button class="ctrl mute" id="muteBtn" type="button" aria-pressed="false" aria-label="Выключить звук" hidden>🔊</button>
+
+<label class="ctrl upload" id="uploadLabel" hidden>
+  <span id="uploadText">Добавить свои фото</span>
+  <input class="sr" id="fileInput" type="file" accept="image/*" multiple>
+</label>
+
+<div class="lightbox" id="lightbox" hidden>
+  <figure><img alt=""><figcaption></figcaption></figure>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const r = (a, b) => a + Math.random() * (b - a);
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const sleep = ms => new Promise(res => setTimeout(res, ms));
+  const shuffle = arr => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const root = document.documentElement;
+
+  /* =====================================================
+     ЗВУК: мелодия и эффекты собираются прямо в браузере
+     ===================================================== */
+  const A = { ctx: null, master: null, bus: null, musicGain: null, sfxGain: null, noise: null, audio: null, muted: false, timer: null, lastBoom: 0 };
+  const soundOn = () => CONFIG.sound && A.ctx;
+
+  function ensureAudio() {
+    if (!CONFIG.sound || A.ctx) return;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AC();
+      A.ctx = ctx;
+      A.master = ctx.createGain();
+      A.master.gain.value = 1;
+      A.master.connect(ctx.destination);
+
+      // «Эхо», чтобы звучало мягче
+      A.bus = ctx.createGain();
+      A.bus.gain.value = 1;
+      const delay = ctx.createDelay(); delay.delayTime.value = 0.27;
+      const fb = ctx.createGain(); fb.gain.value = 0.3;
+      const wet = ctx.createGain(); wet.gain.value = 0.28;
+      A.bus.connect(A.master);
+      A.bus.connect(delay); delay.connect(fb); fb.connect(delay); delay.connect(wet); wet.connect(A.master);
+
+      A.musicGain = ctx.createGain(); A.musicGain.gain.value = 0.17; A.musicGain.connect(A.bus);
+      A.sfxGain = ctx.createGain(); A.sfxGain.gain.value = 0.55; A.sfxGain.connect(A.master);
+
+      A.noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+      const d = A.noise.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+
+      $('muteBtn').hidden = false;
+    } catch (e) { A.ctx = null; }
+  }
+
+  const NOTE = { G4: 392.00, A4: 440.00, B4: 493.88, C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99 };
+  const PHRASES = [
+    [['G4', .75], ['G4', .25], ['A4', 1], ['G4', 1], ['C5', 1], ['B4', 2]],
+    [['G4', .75], ['G4', .25], ['A4', 1], ['G4', 1], ['D5', 1], ['C5', 2]],
+    [['G4', .75], ['G4', .25], ['G5', 1], ['E5', 1], ['C5', 1], ['B4', 1], ['A4', 2]],
+    [['F5', .75], ['F5', .25], ['E5', 1], ['C5', 1], ['D5', 1], ['C5', 2]]
+  ];
+  const CHORDS = [
+    [130.81, 164.81, 196.00],   // до-мажор
+    [98.00, 123.47, 146.83],    // соль
+    [87.31, 110.00, 130.81],    // фа
+    [130.81, 164.81, 196.00]    // до-мажор
+  ];
+
+  function tone(f, t, d) {
+    const c = A.ctx;
+    const o1 = c.createOscillator(), o2 = c.createOscillator();
+    const g1 = c.createGain(), g2 = c.createGain();
+    o1.type = 'triangle'; o1.frequency.value = f;
+    o2.type = 'sine'; o2.frequency.value = f * 2;
+    g1.gain.setValueAtTime(0.0001, t);
+    g1.gain.linearRampToValueAtTime(0.5, t + 0.03);
+    g1.gain.exponentialRampToValueAtTime(0.001, t + d * 0.95);
+    g2.gain.value = 0.22;
+    o1.connect(g1); o2.connect(g2); g2.connect(g1); g1.connect(A.musicGain);
+    o1.start(t); o2.start(t); o1.stop(t + d); o2.stop(t + d);
+  }
+  function pad(freqs, t, d) {
+    const c = A.ctx;
+    freqs.forEach(f => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.09, t + 0.5);
+      g.gain.linearRampToValueAtTime(0.09, t + Math.max(0.6, d - 0.3));
+      g.gain.linearRampToValueAtTime(0.0001, t + d);
+      o.connect(g); g.connect(A.musicGain);
+      o.start(t); o.stop(t + d + 0.05);
+    });
+  }
+  function playMelody() {
+    if (!A.ctx) return;
+    if (document.hidden) { A.timer = setTimeout(playMelody, 1000); return; }
+    const beat = 0.52;
+    let t = A.ctx.currentTime + 0.08;
+    PHRASES.forEach((phrase, pi) => {
+      const start = t;
+      phrase.forEach(([n, b]) => { tone(NOTE[n], t, b * beat); t += b * beat; });
+      pad(CHORDS[pi], start, t - start);
+    });
+    A.timer = setTimeout(playMelody, (t - A.ctx.currentTime + 2.5) * 1000);
+  }
+  function startMusic() {
+    if (!CONFIG.sound) return;
+    if (CONFIG.musicFile) {
+      A.audio = new Audio(CONFIG.musicFile);
+      A.audio.loop = true; A.audio.volume = 0.6;
+      A.audio.play().catch(() => {});
+    } else if (A.ctx) {
+      playMelody();
+    }
+  }
+  function setMuted(m) {
+    A.muted = m;
+    if (A.master) A.master.gain.value = m ? 0 : 1;
+    if (A.audio) A.audio.muted = m;
+    const b = $('muteBtn');
+    b.textContent = m ? '🔇' : '🔊';
+    b.setAttribute('aria-pressed', String(m));
+    b.setAttribute('aria-label', m ? 'Включить звук' : 'Выключить звук');
+  }
+  $('muteBtn').addEventListener('click', () => setMuted(!A.muted));
+  document.addEventListener('visibilitychange', () => {
+    if (!A.ctx) return;
+    if (document.hidden) A.ctx.suspend(); else A.ctx.resume();
+  });
+
+  function noiseHit(t, dur, filterType, freq, vol) {
+    const c = A.ctx;
+    const s = c.createBufferSource(); s.buffer = A.noise;
+    const f = c.createBiquadFilter(); f.type = filterType; f.frequency.value = freq;
+    const g = c.createGain();
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    s.connect(f); f.connect(g); g.connect(A.sfxGain);
+    s.start(t); s.stop(t + dur + 0.02);
+  }
+  const sfx = {
+    pop() {
+      if (!soundOn()) return;
+      const t = A.ctx.currentTime;
+      noiseHit(t, 0.12, 'highpass', 900, 0.9);
+      const o = A.ctx.createOscillator(), g = A.ctx.createGain();
+      o.frequency.setValueAtTime(320, t); o.frequency.exponentialRampToValueAtTime(70, t + 0.1);
+      g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+      o.connect(g); g.connect(A.sfxGain); o.start(t); o.stop(t + 0.14);
+    },
+    blow() {
+      if (!soundOn()) return;
+      const c = A.ctx, t = c.currentTime;
+      const s = c.createBufferSource(); s.buffer = A.noise;
+      const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 900;
+      const g = c.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.5, t + 0.12);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 1.0);
+      s.connect(f); f.connect(g); g.connect(A.sfxGain); s.start(t); s.stop(t + 1.05);
+    },
+    boom() {
+      if (!soundOn()) return;
+      const now = performance.now();
+      if (now - A.lastBoom < 140) return;
+      A.lastBoom = now;
+      const c = A.ctx, t = c.currentTime;
+      const o = c.createOscillator(), g = c.createGain();
+      o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(40, t + 0.5);
+      g.gain.setValueAtTime(0.45, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+      o.connect(g); g.connect(A.sfxGain); o.start(t); o.stop(t + 0.6);
+      noiseHit(t, 0.35, 'lowpass', 500, 0.5);
+    },
+    chime() {
+      if (!soundOn()) return;
+      const c = A.ctx, t0 = c.currentTime;
+      [784, 988, 1319, 1568].forEach((f, i) => {
+        const t = t0 + i * 0.09;
+        const o = c.createOscillator(), g = c.createGain();
+        o.type = 'sine'; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.linearRampToValueAtTime(0.35, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 1.1);
+        o.connect(g); g.connect(A.bus); o.start(t); o.stop(t + 1.15);
+      });
+    }
+  };
+
+  /* =====================================================
+     ЭФФЕКТЫ: конфетти и салюты
+     ===================================================== */
+  const COLORS = ['#ff5c8a', '#ffb58a', '#cdb8ff', '#ffe27a', '#7ae0c3', '#fff6ee'];
+  const fx = (() => {
+    const cc = $('confetti'), fc = $('fireworks');
+    const c1 = cc.getContext('2d'), c2 = fc.getContext('2d');
+    let conf = [], sparks = [], rockets = [], raf = null;
+
+    function size() {
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      [[cc, c1], [fc, c2]].forEach(([cv, cx]) => {
+        cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
+        cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      });
+    }
+    size();
+
+    function confetti(x, y, n, angle, spread, colors) {
+      if (reduce) return;
+      const cols = colors || COLORS;
+      for (let i = 0; i < n; i++) {
+        const a = angle + (Math.random() - 0.5) * spread;
+        const s = r(5, 14);
+        conf.push({
+          x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+          w: r(6, 12), h: r(4, 8), rot: r(0, 6.28), vr: r(-0.3, 0.3),
+          c: pick(cols), life: 0, max: r(110, 190)
+        });
+      }
+      kick();
+    }
+    function rocket(x) {
+      if (reduce) return;
+      const H = innerHeight;
+      rockets.push({ x: x == null ? r(innerWidth * 0.12, innerWidth * 0.88) : x, y: H + 10, vy: -r(11, 15) * Math.max(0.7, H / 800), ty: r(H * 0.14, H * 0.45), c: pick(COLORS) });
+      kick();
+    }
+    function explode(x, y, color) {
+      const n = Math.floor(r(60, 95));
+      const ring = Math.random() < 0.4;
+      const rand = r(0, 6.28);
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * 6.283 + rand;
+        const s = ring ? r(5.4, 6.1) : r(1.5, 7);
+        sparks.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 0, max: r(55, 85), c: Math.random() < 0.7 ? color : pick(COLORS), s: r(1.5, 2.6) });
+      }
+      sfx.boom();
+    }
+    function celebrate() {
+      if (reduce) return;
+      const W = innerWidth, H = innerHeight;
+      confetti(W * 0.08, H, 70, -Math.PI / 3, 0.9);
+      confetti(W * 0.92, H, 70, -2 * Math.PI / 3, 0.9);
+      setTimeout(() => confetti(W * 0.5, H * 0.95, 90, -Math.PI / 2, 1.4), 250);
+      setTimeout(() => rocket(W * 0.3), 500);
+      setTimeout(() => rocket(W * 0.7), 900);
+      setTimeout(() => rocket(), 1300);
+    }
+    function kick() { if (!raf) raf = requestAnimationFrame(loop); }
+
+    function loop() {
+      const W = innerWidth, H = innerHeight;
+      // конфетти
+      c1.clearRect(0, 0, W, H);
+      conf = conf.filter(p => p.life < p.max);
+      for (const p of conf) {
+        p.life++; p.vx *= 0.985; p.vy = p.vy * 0.985 + 0.22;
+        p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+        c1.globalAlpha = Math.min(1, (p.max - p.life) / (p.max * 0.3));
+        c1.save(); c1.translate(p.x, p.y); c1.rotate(p.rot);
+        c1.fillStyle = p.c; c1.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        c1.restore();
+      }
+      c1.globalAlpha = 1;
+
+      // салют: ракеты и искры со следом
+      c2.globalCompositeOperation = 'destination-out';
+      c2.fillStyle = 'rgba(0,0,0,.22)';
+      c2.fillRect(0, 0, W, H);
+      c2.globalCompositeOperation = 'lighter';
+      rockets = rockets.filter(k => {
+        k.y += k.vy;
+        c2.fillStyle = k.c; c2.beginPath(); c2.arc(k.x, k.y, 2.4, 0, 6.283); c2.fill();
+        if (k.y <= k.ty) { explode(k.x, k.y, k.c); return false; }
+        return true;
+      });
+      sparks = sparks.filter(p => p.life < p.max);
+      for (const p of sparks) {
+        p.life++; p.vx *= 0.97; p.vy = p.vy * 0.97 + 0.08;
+        p.x += p.vx; p.y += p.vy;
+        c2.globalAlpha = Math.max(0, 1 - p.life / p.max);
+        c2.fillStyle = p.c; c2.beginPath(); c2.arc(p.x, p.y, p.s, 0, 6.283); c2.fill();
+      }
+      c2.globalAlpha = 1;
+      c2.globalCompositeOperation = 'source-over';
+
+      if (conf.length || sparks.length || rockets.length) {
+        raf = requestAnimationFrame(loop);
+      } else {
+        raf = null;
+        c1.clearRect(0, 0, W, H); c2.clearRect(0, 0, W, H);
+      }
+    }
+    return { size, confetti, rocket, celebrate };
+  })();
+
+  /* =====================================================
+     ФОН: звёзды и падающая звезда
+     ===================================================== */
+  (function stars() {
+    const sky = $('sky');
+    const n = innerWidth < 640 ? 45 : 80;
+    for (let i = 0; i < n; i++) {
+      const s = document.createElement('span');
+      s.className = 'star';
+      const sz = r(1, 2.6);
+      s.style.cssText = `left:${r(0, 100).toFixed(1)}%;top:${r(0, 100).toFixed(1)}%;width:${sz.toFixed(1)}px;height:${sz.toFixed(1)}px;--t:${r(2.5, 6).toFixed(1)}s;--d:${(-r(0, 6)).toFixed(1)}s`;
+      sky.appendChild(s);
+    }
+    if (reduce) return;
+    const shoot = $('shoot');
+    setInterval(() => {
+      if (document.hidden) return;
+      shoot.classList.remove('go');
+      shoot.style.left = r(40, 95).toFixed(0) + '%';
+      shoot.style.top = r(2, 35).toFixed(0) + '%';
+      void shoot.offsetWidth;
+      shoot.classList.add('go');
+    }, 9000);
+  })();
+
+  /* =====================================================
+     ФОТО
+     ===================================================== */
+  const norm = p => typeof p === 'string' ? { src: p, caption: '' } : { src: p.src, caption: p.caption || '' };
+  function demoPhoto(emoji, c1, c2) {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 250"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs><rect width="200" height="250" fill="url(#g)"/><text x="100" y="145" font-size="88" text-anchor="middle">${emoji}</text></svg>`;
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  }
+  const demo = [
+    /*{ src: demoPhoto('🌷', '#ff9ec4', '#ffd2a8'), caption: 'Твои тюльпаны' },
+    { src: demoPhoto('🎂', '#b79cff', '#ffb3d1'), caption: 'Праздник' },
+    { src: demoPhoto('🎈', '#ffc27a', '#ff7aa8'), caption: 'Шарики' },
+    { src: demoPhoto('🌸', '#ffc2dc', '#c9b6ff'), caption: 'Весна' },
+    { src: demoPhoto('☕', '#ffd9a0', '#e39a72'), caption: 'Утро с чаем' },
+    { src: demoPhoto('🦋', '#9fd8ff', '#c9b6ff'), caption: 'Лето' },
+    { src: demoPhoto('🍰', '#ffb3c1', '#ffe0a8'), caption: 'Твой пирог' },
+    { src: demoPhoto('💐', '#ffa6b8', '#ffd0e6'), caption: 'Для тебя' }*/
+  ]; 
+  let photos = (CONFIG.photos && CONFIG.photos.length) ? CONFIG.photos.map(norm) : demo.slice();
+
+  /* ---- Просмотр крупно ---- */
+  const lightbox = $('lightbox');
+  function openLightbox(src, caption) {
+    lightbox.querySelector('img').src = src;
+    lightbox.querySelector('figcaption').textContent = caption || '';
+    lightbox.hidden = false;
+  }
+  lightbox.addEventListener('click', () => { lightbox.hidden = true; });
+  addEventListener('keydown', e => { if (e.key === 'Escape') lightbox.hidden = true; });
+
+  /* ---- Плавающие рамки на фоне ---- */
+  const layer = $('floaters');
+  function buildFloaters() {
+    layer.textContent = '';
+    const mobile = innerWidth < 640;
+    const n = mobile ? 9 : 15;
+    const pool = shuffle(photos.slice());
+    const order = shuffle([...Array(n).keys()]);
+
+    for (let i = 0; i < n; i++) {
+      const depth = Math.random();
+      let w, dur, blur, op, d;
+      if (depth < 0.35)      { w = mobile ? r(105, 140) : r(170, 230); dur = r(26, 34); blur = 0; op = 1;    d = 1.1; }
+      else if (depth < 0.75) { w = mobile ? r(85, 110)  : r(120, 160); dur = r(38, 48); blur = 0; op = 0.95; d = 0.7; }
+      else                   { w = mobile ? r(60, 80)   : r(75, 100);  dur = r(55, 70); blur = 2; op = 0.6;  d = 0.35; }
+
+      const ph = pool[i % pool.length];
+      const el = document.createElement('div');
+      el.className = 'float';
+      el.style.cssText =
+        `--x:${((order[i] + Math.random() * 0.6) / n * 100).toFixed(1)}%;` +
+        `--w:${w.toFixed(0)}px;--dur:${dur.toFixed(1)}s;--delay:${(-r(0, dur)).toFixed(1)}s;` +
+        `--sway:${r(4, 8).toFixed(1)}s;--rot:${r(-9, 9).toFixed(1)}deg;` +
+        `--blur:${blur}px;--op:${op};--d:${d};--sy:${r(4, 80).toFixed(0)}vh`;
+
+      const par = document.createElement('div'); par.className = 'par';
+      const sway = document.createElement('div'); sway.className = 'sway';
+      const frame = document.createElement('div'); frame.className = 'frame' + (blur ? ' far' : '');
+      const img = document.createElement('img');
+      img.alt = ph.caption || 'Фото'; img.draggable = false;
+      img.onerror = () => { img.onerror = null; img.src = demo[i % demo.length].src; };
+      img.src = ph.src;
+      frame.appendChild(img);
+      if (ph.caption && !blur) {
+        const cap = document.createElement('div'); cap.className = 'cap'; cap.textContent = ph.caption;
+        frame.appendChild(cap);
+      }
+      frame._ph = ph;
+      sway.appendChild(frame); par.appendChild(sway); el.appendChild(par); layer.appendChild(el);
+    }
+  }
+  buildFloaters();
+
+  layer.addEventListener('click', e => {
+    const frame = e.target.closest('.frame');
+    if (!frame || !frame._ph) return;
+    openLightbox(frame.querySelector('img').src, frame._ph.caption);
+  });
+
+  let wasMobile = innerWidth < 640;
+  addEventListener('resize', () => {
+    fx.size();
+    const m = innerWidth < 640;
+    if (m !== wasMobile) { wasMobile = m; buildFloaters(); }
+  });
+
+  /* ---- Лёгкий параллакс от мыши ---- */
+  if (!reduce) {
+    let raf = null, px = 0, py = 0;
+    addEventListener('pointermove', e => {
+      if (e.pointerType === 'touch') return;
+      px = e.clientX / innerWidth - 0.5; py = e.clientY / innerHeight - 0.5;
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = null;
+        root.style.setProperty('--mx', (px * -46).toFixed(1) + 'px');
+        root.style.setProperty('--my', (py * -46).toFixed(1) + 'px');
+      });
+    });
+  }
+
+  /* ---- Загрузка своих фото (остаются только в браузере) ---- */
+  if (CONFIG.showUploadButton) $('uploadLabel').hidden = false;
+  $('fileInput').addEventListener('change', e => {
+    const list = [...e.target.files].filter(f => f.type.startsWith('image/')).map(f => ({ src: URL.createObjectURL(f), caption: '' }));
+    if (!list.length) return;
+    photos = list;
+    buildFloaters();
+    $('uploadText').textContent = `Добавлено фото: ${list.length}`;ф
+  });
+
+  /* =====================================================
+     СЦЕНЫ
+     ===================================================== */
+  let current = 'intro', busy = false;
+  const hooks = {};
+  function go(next) {
+    if (busy) return;
+    busy = true;
+    const from = $('s-' + current), to = $('s-' + next), prev = current;
+    current = next;
+    if (hooks[prev] && hooks[prev].leave) hooks[prev].leave();
+    const swap = () => {
+      from.hidden = true; from.classList.remove('out');
+      to.hidden = false;
+      scrollTo(0, 0);
+      to.setAttribute('tabindex', '-1');
+      to.focus({ preventScroll: true });
+      if (hooks[next] && hooks[next].enter) hooks[next].enter();
+      busy = false;
+    };
+    if (reduce) swap(); else { from.classList.add('out'); setTimeout(swap, 420); }
+  }
+
+  /* ---------- 1. Приветствие ---------- */
+  (function buildTitle() {
+    const h = $('title');
+    h.setAttribute('aria-label', CONFIG.title.replace(/\n/g, ' '));
+    let i = 0;
+    CONFIG.title.split('\n').forEach((line, li) => {
+      if (li) h.appendChild(document.createElement('br'));
+      const words = line.split(' ');
+      words.forEach((word, wi) => {
+        const w = document.createElement('span');
+        w.className = 'w'; w.setAttribute('aria-hidden', 'true');
+        w.style.setProperty('--i', i++);
+        w.textContent = word;
+        h.appendChild(w);
+        if (wi < words.length - 1) h.appendChild(document.createTextNode(' '));
+      });
+    });
+    document.title = CONFIG.title.replace(/\n/g, ' ');
+    $('hint').textContent = CONFIG.hint;
+  })();
+
+  /* ---- Обратный отсчёт до даты открытия ---- */
+  (function countdown() {
+    const unlockAt = CONFIG.unlockAt ? new Date(CONFIG.unlockAt) : null;
+    const preview = /[?&]preview/.test(location.search);
+    if (!unlockAt || isNaN(unlockAt.getTime()) || preview) return;
+    const btn = $('openBtn'), box = $('countdown');
+    let timer = null;
+    const pad2 = n => String(n).padStart(2, '0');
+    function tick() {
+      const ms = unlockAt.getTime() - Date.now();
+      if (ms <= 0) {
+        clearInterval(timer);
+        box.hidden = true; btn.disabled = false;
+        btn.textContent = 'Открыть поздравление';
+        $('hint').textContent = CONFIG.hint;
+        fx.celebrate();
+        return;
+      }
+      const s = Math.floor(ms / 1000);
+      $('cd-d').textContent = Math.floor(s / 86400);
+      $('cd-h').textContent = pad2(Math.floor(s % 86400 / 3600));
+      $('cd-m').textContent = pad2(Math.floor(s % 3600 / 60));
+      $('cd-s').textContent = pad2(s % 60);
+    }
+    box.hidden = false; btn.disabled = true;
+    btn.textContent = 'Пока рано…';
+    $('hint').textContent = 'Открытка откроется через:';
+    tick();
+    timer = setInterval(tick, 1000);
+  })();
+
+  $('openBtn').addEventListener('click', () => {
+    ensureAudio();
+    startMusic();
+    fx.celebrate();
+    go('cake');
+  });
+
+  /* ---------- 2. Торт ---------- */
+  function buildCake() {
+    const age = CONFIG.age;
+    const rnd = s => { const x = Math.sin(s * 127.1) * 43758.5453; return x - Math.floor(x); };
+    const scallop = (x1, x2, y, r0, fill) => {
+      const n = Math.round((x2 - x1) / (2 * r0));
+      const rr = (x2 - x1) / (2 * n);
+      let d = `M${x1},${y - 12} H${x2} V${y}`;
+      for (let i = 0; i < n; i++) d += ` a${rr},${rr} 0 0 1 ${-2 * rr},0`;
+      return `<path d="${d} Z" fill="${fill}"/>`;
+    };
+    const dots = (count, x1, x2, y1, y2, seed, skip) => {
+      let s = '';
+      for (let i = 0; i < count; i++) {
+        const x = x1 + rnd(seed + i * 2) * (x2 - x1), y = y1 + rnd(seed + i * 2 + 1) * (y2 - y1);
+        if (skip && x > skip[0] && x < skip[1] && y > skip[2] && y < skip[3]) continue;
+        s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.2" fill="${COLORS[i % COLORS.length]}"/>`;
+      }
+      return s;
+    };
+    const candleColors = ['#ff8fb3', '#8fd8ff', '#ffe27a', '#b8f0c8', '#ffb58a'];
+    let candles = '';
+    [118, 134, 150, 166, 182].forEach((x, i) => {
+      candles +=
+        `<g transform="translate(${x},94)">` +
+          `<rect x="-3" y="-28" width="6" height="30" rx="2" fill="${candleColors[i]}"/>` +
+          `<rect x="-3" y="-21" width="6" height="3" fill="rgba(255,255,255,.55)"/>` +
+          `<rect x="-3" y="-12" width="6" height="3" fill="rgba(255,255,255,.55)"/>` +
+          `<g transform="translate(0,-28)">` +
+            `<path class="smoke" d="M0,-2 q-5,-8 0,-14 q5,-6 0,-14" fill="none" stroke="rgba(255,246,238,.75)" stroke-width="2" stroke-linecap="round"/>` +
+            `<g class="flame" style="animation-delay:${(-i * 0.05).toFixed(2)}s">` +
+              `<circle r="17" cy="-9" fill="url(#glow)"/>` +
+              `<path d="M0,-18 C6,-10 6,-2 0,1 C-6,-2 -6,-10 0,-18Z" fill="url(#fl)"/>` +
+              `<ellipse cx="0" cy="-4" rx="1.8" ry="3.4" fill="#fffbe6"/>` +
+            `</g>` +
+          `</g>` +
+        `</g>`;
+    });
+
+    const ageText = age != null && age !== ''
+      ? `<text x="150" y="243" text-anchor="middle" font-family="'Marck Script','Segoe Script',cursive" font-size="42" fill="#fff6ee">${String(age).replace(/[<>&]/g, '')}</text>` : '';
+    const skip = ageText ? [105, 195, 212, 250] : null;
+
+    const svg =
+      `<svg viewBox="0 0 300 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">` +
+      `<defs>` +
+        `<radialGradient id="glow"><stop offset="0" stop-color="#ffd27a" stop-opacity=".85"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient>` +
+        `<linearGradient id="fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3b0"/><stop offset=".55" stop-color="#ffb020"/><stop offset="1" stop-color="#ff6a3d"/></linearGradient>` +
+      `</defs>` +
+      `<ellipse cx="150" cy="271" rx="134" ry="14" fill="#f3e6ff" opacity=".9"/>` +
+      `<ellipse cx="150" cy="267" rx="128" ry="11" fill="#fff6ee"/>` +
+      `<rect x="50" y="186" width="200" height="82" rx="10" fill="#e23f7f"/>` +
+      scallop(50, 250, 196, 10, '#fff6ee') +
+      dots(24, 60, 240, 212, 258, 3, skip) + ageText +
+      `<rect x="80" y="134" width="140" height="58" rx="10" fill="#ffb58a"/>` +
+      scallop(80, 220, 144, 10, '#fff6ee') +
+      dots(12, 90, 210, 160, 186, 40) +
+      `<rect x="106" y="92" width="88" height="46" rx="8" fill="#cdb8ff"/>` +
+      scallop(106, 194, 102, 7.3, '#fff6ee') +
+      dots(6, 114, 186, 116, 134, 90) +
+      candles +
+      `</svg>`;
+    $('cake').innerHTML = svg;
+  }
+  buildCake();
+
+  let blown = false, micStream = null, micTimer = null, micSrc = null;
+  function stopMic() {
+    if (micTimer) { clearInterval(micTimer); micTimer = null; }
+    if (micSrc) { try { micSrc.disconnect(); } catch (e) {} micSrc = null; }
+    if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+    $('micBtn').textContent = '🎤 Подуть в микрофон';
+  }
+  function blow() {
+    if (blown) return;
+    blown = true;
+    stopMic();
+    $('cakeWrap').classList.add('out');
+    $('cake').disabled = true;
+    $('micBtn').hidden = true;
+    $('micNote').textContent = '';
+    sfx.blow();
+    $('cakeHead').textContent = 'Пусть всё сбудется!';
+    $('cakeSub').textContent = 'Твоё желание уже летит к звёздам…';
+    setTimeout(() => { sfx.chime(); fx.celebrate(); }, 550);
+    setTimeout(() => { $('toLetter').hidden = false; }, 1800);
+  }
+  hooks.cake = {
+    enter() {
+      blown = false;
+      $('cakeWrap').classList.remove('out');
+      $('cake').disabled = false;
+      $('micBtn').hidden = false;
+      $('toLetter').hidden = true;
+      $('micNote').textContent = '';
+      $('cakeHead').textContent = 'Загадай желание';
+      $('cakeSub').textContent = 'Нажми на торт, чтобы задуть свечи';
+    },
+    leave() { stopMic(); }
+  };
+  $('cake').addEventListener('click', blow);
+
+  $('micBtn').addEventListener('click', async () => {
+    if (micStream) { stopMic(); $('micNote').textContent = ''; return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      $('micNote').textContent = 'Микрофон здесь недоступен — просто нажми на торт.';
+      return;
+    }
+    try {
+      // AudioContext нужен и для анализа звука, даже если звук сайта выключен
+      if (!A.ctx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        A.ctx = new AC();
+      }
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      micSrc = A.ctx.createMediaStreamSource(micStream);
+      const an = A.ctx.createAnalyser();
+      an.fftSize = 1024;
+      micSrc.connect(an);
+      const data = new Uint8Array(an.fftSize);
+      let hits = 0;
+      $('micBtn').textContent = '🎤 Слушаю… подуй!';
+      $('micNote').textContent = 'Подуй в микрофон, как на настоящие свечи';
+      micTimer = setInterval(() => {
+        an.getByteTimeDomainData(data);
+        let sum = 0;
+        for (let i = 0; i < data.length; i++) { const v = (data[i] - 128) / 128; sum += v * v; }
+        const rms = Math.sqrt(sum / data.length);
+        hits = rms > 0.2 ? hits + 1 : Math.max(0, hits - 1);
+        if (hits >= 4) blow();
+      }, 60);
+    } catch (e) {
+      stopMic();
+      $('micNote').textContent = 'Нет доступа к микрофону — просто нажми на торт.';
+    }
+  });
+  $('toLetter').addEventListener('click', () => go('letter'));
+
+  /* ---------- 3. Письмо ---------- */
+  let typeToken = 0, skipTyping = false;
+  async function typeLetter() {
+    const token = ++typeToken;
+    skipTyping = reduce;
+    $('heading').textContent = CONFIG.heading;
+    $('sign').textContent = CONFIG.signature;
+    $('sign').classList.remove('in');
+    $('toWishes').hidden = true;
+    $('skipType').hidden = false;
+    const cont = $('lines');
+    cont.textContent = '';
+
+    // Сразу кладём весь текст невидимыми буквами, чтобы карточка не прыгала
+    const paras = CONFIG.lines.map(line => {
+      const p = document.createElement('p');
+      const spans = [...line].map(ch => {
+        const s = document.createElement('span');
+        s.className = 'c'; s.textContent = ch; p.appendChild(s); return s;
+      });
+      cont.appendChild(p);
+      return { p, spans };
+    });
+
+    const wait = ms => skipTyping ? Promise.resolve() : sleep(ms);
+    await wait(700);
+    for (const { p, spans } of paras) {
+      if (token !== typeToken) return;
+      if (!skipTyping) p.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      for (const s of spans) {
+        if (token !== typeToken) return;
+        s.classList.add('on');
+        await wait(/[.,!?…—:]/.test(s.textContent) ? 170 : 24);
+      }
+      await wait(380);
+    }
+    if (token !== typeToken) return;
+    $('skipType').hidden = true;
+    $('sign').classList.add('in');
+    await wait(500);
+    if (token !== typeToken) return;
+    $('toWishes').hidden = false;
+    $('sign').scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' });
+  }
+  hooks.letter = {
+    enter() { typeLetter(); },
+    leave() { typeToken++; }
+  };
+  $('skipType').addEventListener('click', () => { skipTyping = true; });
+  $('toWishes').addEventListener('click', () => go('wishes'));
+
+  /* ---------- 4. Шарики с пожеланиями ---------- */
+  const BALLOON_COLORS = [
+    ['#ff8fb3', '#e23f7f'], ['#ffd0a8', '#ff9a5c'], ['#e0d2ff', '#a98cf0'],
+    ['#b8f5df', '#3fc9a0'], ['#fff2a8', '#f2c230'], ['#ffb3a6', '#f0604d']
+  ];
+  let popped = 0;
+  function updateCount() {
+    const total = CONFIG.wishes.length;
+    $('wishCount').textContent = `Лопнуто шариков: ${popped} из ${total}`;
+  }
+  function showWish(text) {
+    const p = $('wishText');
+    p.textContent = text;
+    p.classList.remove('swap'); void p.offsetWidth; p.classList.add('swap');
+  }
+  function buildBalloons() {
+    const box = $('balloons');
+    box.textContent = '';
+    popped = 0;
+    const total = CONFIG.wishes.length;
+    const mobile = innerWidth < 640;
+    const cols = 4, rows = Math.ceil(total / cols);
+    const bw = mobile ? 62 : 82;
+    const rowH = bw * 1.22 + 66;
+    box.style.height = (rows * rowH + 10) + 'px';
+    const order = shuffle([...Array(total).keys()]);
+
+    CONFIG.wishes.forEach((wish, i) => {
+      const slot = order[i];
+      const col = slot % cols, row = Math.floor(slot / cols);
+      const [c1, c2] = BALLOON_COLORS[i % BALLOON_COLORS.length];
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'balloon';
+      b.setAttribute('aria-label', 'Шарик с пожеланием');
+      b.style.cssText =
+        `--bw:${bw}px;--c1:${c1};--c2:${c2};` +
+        `--bx:calc(${(((col + 0.5) / cols) * 100).toFixed(1)}% - ${bw / 2}px + ${r(-8, 8).toFixed(0)}px);` +
+        `--by:${(row * rowH + r(0, 12)).toFixed(0)}px;` +
+        `--bt:${r(2.6, 4.2).toFixed(1)}s;--bd:${(-r(0, 3)).toFixed(1)}s`;
+      b.innerHTML = '<span class="b"></span>';
+      b.addEventListener('click', () => {
+        b.disabled = true; b.classList.add('pop');
+        const rc = b.getBoundingClientRect();
+        fx.confetti(rc.left + rc.width / 2, rc.top + rc.height / 2, 34, 0, Math.PI * 2, [c1, c2, '#fff6ee']);
+        sfx.pop();
+        showWish(wish);
+        popped++; updateCount();
+        if (popped === total) {
+          $('skipWishes').hidden = true;
+          $('toFinale').hidden = false;
+          setTimeout(() => { sfx.chime(); fx.celebrate(); }, 300);
+        }
+      });
+      box.appendChild(b);
+    });
+    updateCount();
+  }
+  hooks.wishes = {
+    enter() {
+      $('skipWishes').hidden = false;
+      $('toFinale').hidden = true;
+      showWish('Выбери любой шарик');
+      buildBalloons();
+    }
+  };
+  $('skipWishes').addEventListener('click', () => go('finale'));
+  $('toFinale').addEventListener('click', () => go('finale'));
+
+  /* ---------- 5. Финал ---------- */
+  let fwTimer = null;
+  function buildReel() {
+    const reel = $('reel');
+    reel.textContent = '';
+    photos.forEach((ph, i) => {
+      const fig = document.createElement('figure');
+      fig.style.setProperty('--rot', (i % 2 ? 1.6 : -1.6) + 'deg');
+      const img = document.createElement('img');
+      img.alt = ph.caption || 'Фото'; img.src = ph.src; img.draggable = false;
+      img.onerror = () => { img.onerror = null; img.src = demo[i % demo.length].src; };
+      const cap = document.createElement('figcaption');
+      cap.textContent = ph.caption;
+      fig.appendChild(img); fig.appendChild(cap);
+      fig._ph = ph;
+      reel.appendChild(fig);
+    });
+  }
+  $('reel').addEventListener('click', e => {
+    const fig = e.target.closest('figure');
+    if (fig && fig._ph) openLightbox(fig.querySelector('img').src, fig._ph.caption);
+  });
+  hooks.finale = {
+    enter() {
+      $('finalTitle').textContent = CONFIG.finalTitle;
+      $('finalText').textContent = CONFIG.finalText;
+      $('reelHead').textContent = CONFIG.reelTitle;
+      $('finalSign').textContent = CONFIG.signature;
+      buildReel();
+      fx.celebrate();
+      sfx.chime();
+      fwTimer = setInterval(() => { if (!document.hidden) fx.rocket(); }, 2600);
+    },
+    leave() { clearInterval(fwTimer); fwTimer = null; }
+  };
+  $('moreFw').addEventListener('click', () => {
+    fx.celebrate(); sfx.chime();
+  });
+  $('restart').addEventListener('click', () => go('cake'));
+})();
+</script>
+</body>
+</html>
